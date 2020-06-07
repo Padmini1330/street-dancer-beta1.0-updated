@@ -18,12 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.street_dancer_beta10.R;
+import com.example.street_dancer_beta10.Segments.Search.Model.Users;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 
@@ -32,129 +34,102 @@ import java.util.List;
 
 public class SearchFragment extends Fragment {
 
-    private static final String TAG = "SearchFragment";
+    private RecyclerView recyclerView;
+    private SearchAdapter adapter;
+    private ArrayList<Users> userList = new ArrayList<>();
 
-    EditText search_edit_text;
-    RecyclerView recyclerView,recyclerView1,recyclerView2;
-    DatabaseReference databaseReference;
-    FirebaseUser firebaseUser;
-    ArrayList<String> username_list;
-    SearchAdapter searchAdapter;
-    int counter = 0;
-    String searchdata;
-
-    public List<Search_items_list> data;
+    EditText search_bar;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        recyclerView=(RecyclerView)view.findViewById(R.id.recyclerView);
+        recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-        searchAdapter = new SearchAdapter(SearchFragment.this,username_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(searchAdapter);
-        return view;
-    }
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        databaseReference  = FirebaseDatabase.getInstance().getReference();
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-       /* recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));*/
+        search_bar = view.findViewById(R.id.search_bar);
+        userList = new ArrayList<>();
 
-        username_list = new ArrayList<>();
-        search_edit_text = (EditText) view.findViewById(R.id.search_bar);
-        Log.d(TAG, "onViewCreated: before");
-        //searchdata = search_edit_text.getText().toString();
+        adapter = new SearchAdapter(getContext(),userList,true);
+        recyclerView.setAdapter(adapter);
 
-        search_edit_text.addTextChangedListener(new TextWatcher() {
+        readUsers();
+        search_bar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG, "beforeTextChanged: ");
+
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG, "onTextChanged: ");
+                searchUsers(charSequence.toString());
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Log.d(TAG, "afterTextChanged: aftertextchange");
-                if(!editable.toString().isEmpty()){
 
-                    //recyclerView.removeAllViews();
-                    Log.d(TAG, "afterTextChanged: text");
-                    setAdapter(editable.toString());
-
-                }else
-                {
-                    Log.d(TAG, "afterTextChanged: else part");
-                    username_list.clear();
-                    recyclerView.removeAllViews();
-                }
-                Log.d(TAG, "afterTextChanged: change");
             }
         });
 
-
+        return view;
     }
 
-    public void setAdapter (final String searchedString)  {
+    private void searchUsers(String s){
+        Query query = FirebaseDatabase.getInstance().getReference("Users").orderByChild("name")
+                .startAt(s)
+                .endAt(s+"\uf8ff");
 
-        Log.d(TAG, "setAdapter: before data change");
-        databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                Log.d(TAG, "onDataChange: data changed");
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Log.d(TAG, "onDataChange: data changed");
-                    String uid = snapshot.getKey();
-
-                    String muser_name = snapshot.child("user_name").getValue(String.class);
-                    if (muser_name.toLowerCase().contains(searchedString.toLowerCase())) {
-                        username_list.add(muser_name);
-                        counter++;
-                    }
-                    if (counter == 15)
-                        break;
+                userList.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Users user = snapshot.getValue(Users.class);
+                    userList.add(user);
                 }
-                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-                recyclerView.setLayoutManager(manager);
-                recyclerView.setHasFixedSize(true);
-                searchAdapter = new SearchAdapter(SearchFragment.this, username_list);
-                recyclerView.setAdapter(searchAdapter);
-                searchAdapter.setOnItemClickListener(new SearchAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(int position) {
-                        username_list.get(position);
-                    }
-                });
+
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: cancel");
+
+            }
+        });
+    }
+
+    private void readUsers() {
+
+        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (search_bar.getText().toString().equals("")) {
+                    userList.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Users user = snapshot.getValue(Users.class);
+
+                        userList.add(user);
+
+                    }
+
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
     }
 
 
 }
-
 
 
 

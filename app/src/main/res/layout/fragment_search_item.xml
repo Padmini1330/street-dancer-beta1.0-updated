@@ -28,10 +28,11 @@
             android:text="Hello"
             android:textSize="18dp"
             android:textColor="#ffffff"
+            android:fontFamily="@font/roboto_condensed_bold"
             android:paddingTop="16dp"
             android:paddingBottom="10dp"
             android:paddingLeft="30dp"
-            android:id="@+id/user_name"/>
+            android:id="@+id/username"/>
     </LinearLayout>
 
 </RelativeLayout>

@@ -12,73 +12,63 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.street_dancer_beta10.R;
+import com.example.street_dancer_beta10.Segments.Search.Model.Users;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
-    Context context;
-    ArrayList<String> username_list= new ArrayList<String>();
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
+    private Context Context;
+    private List<Users> Users;
+    private FirebaseUser firebaseUser;
+    private boolean isFragment;
 
-    private OnItemClickListener mListener;
-
-    public SearchAdapter(Context context, ArrayList<String> username_list, List<Search_items_list> data) {
-        this.context = context;
-        this.username_list = username_list;
-
+    public SearchAdapter(Context context, List<Users> users, boolean isFragment){
+        Context = context;
+        Users = users;
+        this.isFragment = isFragment;
     }
 
-    public SearchAdapter(SearchFragment searchFragment, ArrayList<String> username_list) {
-    }
-
-
-    public SearchAdapter.SearchViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.fragment_search_item, parent, false);
-        return new SearchAdapter.SearchViewHolder(view, mListener);
+    @NonNull
+    @Override
+    public SearchAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(Context).inflate(R.layout.fragment_search_item, parent, false);
+        return new SearchAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
-        holder.username.setText(username_list.get(position));
+    public void onBindViewHolder(@NonNull final SearchAdapter.ViewHolder holder, final int position) {
+
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        final Users user = Users.get(position);
+
+
+        holder.username.setText(user.getName());
+
+
     }
+
 
     @Override
     public int getItemCount() {
-        return username_list.size();
+        return Users.size();
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mListener = listener;
-    }
+        public TextView username;
 
-    public static class SearchViewHolder extends RecyclerView.ViewHolder {
-        TextView username;
-
-        public SearchViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
+        public ViewHolder(View itemView) {
             super(itemView);
-            username = (TextView) itemView.findViewById(R.id.username_text_view);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Context context = view.getContext();
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-//                            Intent intent = new Intent(view.getContext(), test_activity.class);
-//                            context.startActivity(intent);
-                        }
-                    }
-                }
-            });
+
+            username = itemView.findViewById(R.id.username);
+
         }
     }
+
 }
-
-
 

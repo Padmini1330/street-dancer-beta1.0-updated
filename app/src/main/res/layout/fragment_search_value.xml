@@ -11,6 +11,7 @@
         android:layout_height="50dp"
         android:text="username"
         android:id="@+id/username_text_view"
+        android:fontFamily="@font/roboto_condensed_bold"
         android:textSize="25dp"
         android:textColor="@color/white"
         android:paddingLeft="30dp"
