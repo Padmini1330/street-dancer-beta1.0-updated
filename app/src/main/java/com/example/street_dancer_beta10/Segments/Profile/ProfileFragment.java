@@ -134,11 +134,14 @@ public class ProfileFragment extends Fragment {
                 fragment = new PrivacyFragment();
                 break;
             case R.id.logout:
+                fragment = new ProfileFragment();
                 firebaseAuth.signOut();
                 Intent intent = new Intent(getContext(), SignInActivity.class);
                 startActivity(intent);
-                Toast.makeText(getContext(), "Logout!", Toast.LENGTH_LONG).show();
+                killActivity();
+                Toast.makeText(getContext(), "Logging out", Toast.LENGTH_LONG).show();
                 break;
+
         }
 
         // MAKING CHANGES AND COMMITTING
@@ -153,6 +156,10 @@ public class ProfileFragment extends Fragment {
                 .commit();
 
         return true;
+    }
+    public void killActivity()
+    {
+        getActivity().finish();
     }
 
     @Override
