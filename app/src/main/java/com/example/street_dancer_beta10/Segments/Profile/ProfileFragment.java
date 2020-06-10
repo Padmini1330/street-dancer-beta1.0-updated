@@ -138,7 +138,7 @@ public class ProfileFragment extends Fragment {
                 firebaseAuth.signOut();
                 Intent intent = new Intent(getContext(), SignInActivity.class);
                 startActivity(intent);
-                killActivity();
+                EndActivity();
                 Toast.makeText(getContext(), "Logging out", Toast.LENGTH_LONG).show();
                 break;
 
@@ -157,7 +157,7 @@ public class ProfileFragment extends Fragment {
 
         return true;
     }
-    public void killActivity()
+    public void EndActivity()
     {
         getActivity().finish();
     }
