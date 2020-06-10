@@ -55,7 +55,8 @@ public class SearchFragment extends Fragment {
         adapter = new SearchAdapter(getContext(),userList,true);
         recyclerView.setAdapter(adapter);
 
-        readUsers();
+       /* readUsers();*/
+
         search_bar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -65,6 +66,7 @@ public class SearchFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 searchUsers(charSequence.toString());
+
             }
 
             @Override
@@ -75,6 +77,13 @@ public class SearchFragment extends Fragment {
 
         return view;
     }
+
+
+
+
+
+
+
 
     private void searchUsers(String s){
         Query query = FirebaseDatabase.getInstance().getReference("Users").orderByChild("name")
@@ -100,7 +109,7 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    private void readUsers() {
+    /*private void readUsers() {
 
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
@@ -126,7 +135,7 @@ public class SearchFragment extends Fragment {
 
             }
         });
-    }
+    }*/
 
 
 }
